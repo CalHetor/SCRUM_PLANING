@@ -1,9 +1,12 @@
+USE [DB_SCRUM_PLANNING]
+GO
 
 CREATE OR ALTER PROC [SQM_SECURITY].[USP_Users]
 (
     @i_userId INT = NULL,
     @i_userFullName VARCHAR(80) = NULL,
     @i_userName VARCHAR(80) = NULL,
+    @i_userEmail VARCHAR(80) = NULL,
     @i_userPassword VARCHAR(256) = NULL,
     @i_userRolId INT = NULL,
     @i_userCreationDate DATETIME = NULL,
@@ -44,6 +47,12 @@ BEGIN
             SET @o_MensajeUsuario = 'EL NOMBRE DE USUARIO ES OBLIGATORIO';
         END;
 
+        ELSE IF ISNULL(@i_userEmail,'') = ''
+        BEGIN
+            SET @o_Numero = 400;
+            SET @o_MensajeUsuario = 'EL CORREO ELECTRONICO ES OBLIGATORIO';
+        END;
+
         ELSE IF ISNULL(@i_userPassword,'') = ''
         BEGIN
             SET @o_Numero = 400;
@@ -54,6 +63,12 @@ BEGIN
         BEGIN
             SET @o_Numero = 400;
             SET @o_MensajeUsuario = 'EL NOMBRE DE USUARIO YA EXISTE';
+        END;
+
+        ELSE IF EXISTS (SELECT 1 FROM [SQM_SECURITY].[TBL_Users] (NOLOCK) WHERE userEmail = @i_userEmail)
+        BEGIN
+            SET @o_Numero = 400;
+            SET @o_MensajeUsuario = 'EL CORREO YA EXISTE';
         END;
 
         ELSE IF NOT EXISTS (SELECT 1 FROM [SQM_CATALOGS].[TBL_Roles] (NOLOCK) WHERE rolId = @i_userRolId AND rolEnable = 1)
@@ -75,8 +90,8 @@ BEGIN
 
                 CLOSE SYMMETRIC KEY KEY_HASH;
 
-                INSERT INTO [SQM_SECURITY].[TBL_Users](userFullName,userName,userPassword,userRolId,userCreationDate,userCreatorId,userEnable)
-                VALUES(@i_userFullName,@i_userName,@w_userPasswordEncrypted,@i_userRolId,@i_userCreationDate,@i_userCreatorId,1);
+                INSERT INTO [SQM_SECURITY].[TBL_Users](userFullName,userName,userEmail,userPassword,userRolId,userCreationDate,userCreatorId,userEnable)
+                VALUES(@i_userFullName,@i_userName,@i_userEmail,@w_userPasswordEncrypted,@i_userRolId,@i_userCreationDate,@i_userCreatorId,1);
 
                 COMMIT TRANSACTION TRX_INS_USER;
 
@@ -125,7 +140,14 @@ BEGIN
         BEGIN
             SET @o_Numero = 400;
             SET @o_MensajeUsuario = 'EL NOMBRE DE USUARIO YA EXISTE';
-            RETURN;
+        END;
+
+        ELSE IF @i_userEmail IS NOT NULL AND
+            EXISTS (SELECT 1 FROM [SQM_SECURITY].[TBL_Users] (NOLOCK) WHERE userEmail = @i_userEmail
+        AND userId <> @i_userId)
+        BEGIN
+            SET @o_Numero = 400;
+            SET @o_MensajeUsuario = 'EL CORREO YA EXISTE';
         END;
 
         ELSE IF @i_userRolId IS NOT NULL AND NOT EXISTS (SELECT 1 FROM [SQM_CATALOGS].[TBL_Roles] (NOLOCK) 
@@ -133,7 +155,6 @@ BEGIN
         BEGIN
             SET @o_Numero = 400;
             SET @o_MensajeUsuario = 'EL ROL NO EXISTE';
-            RETURN;
         END;
         
         ELSE
@@ -153,6 +174,7 @@ BEGIN
                 UPDATE [SQM_SECURITY].[TBL_Users]
                 SET userFullName = COALESCE(@i_userFullName,userFullName),
                     userName = COALESCE(@i_userName,userName),
+                    userEmail = COALESCE(@i_userEmail,userEmail),
                     userPassword = COALESCE(@w_userPasswordEncrypted,userPassword),
                     userRolId = COALESCE(@i_userRolId,userRolId),
                     userModificationDate = @i_userModificationDate,
@@ -187,8 +209,8 @@ BEGIN
             SELECT 
                 userId, 
                 userFullName,
-                userName, 
-                userPassword,
+                userName,
+                userEmail,
                 userRolId,
                 userCreationDate,
                 userCreatorId,
