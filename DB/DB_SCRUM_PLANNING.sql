@@ -160,9 +160,9 @@ CREATE TABLE [SQM_GENERAL].[TBL_Tasks]
 	taskDescription VARCHAR(2000) NOT NULL,
 	taskOwner INT REFERENCES [SQM_SECURITY].[TBL_Users] (userId) NOT NULL,
 	taskParentLink INT REFERENCES [SQM_GENERAL].[TBL_ProductBacklogItems](PBIId) NOT NULL,
-	taskOriginalEstimate INT, --5
-	taskCompletedWork INT, --6
-	taskRemaningWork INT NULL,
+	taskOriginalEstimate DECIMAL(4,2) NULL, --5
+	taskCompletedWork DECIMAL(4,2) NULL, --6
+	taskRemaningWork DECIMAL(4,2) NULL,
 	taskStartDate DATE NULL,
 	taskCompletedDate DATE NULL,
 	taskDueDate DATE NULL,
