@@ -35,13 +35,13 @@ DECLARE @Numero INT, @MensajeUsuario VARCHAR(500), @MensajeTecnico VARCHAR(500)
 --     @o_MensajeTecnico = @MensajeTecnico OUTPUT;
 
 
-EXEC [SQM_SECURITY].[USP_Users]
-    @i_PageNumber = 3,
-    @i_RowsPerPage = 10,
-    @w_Accion = 'S',
-    @o_Numero = @Numero OUTPUT,
-    @o_MensajeUsuario = @MensajeUsuario OUTPUT,
-    @o_MensajeTecnico = @MensajeTecnico OUTPUT;
+-- EXEC [SQM_SECURITY].[USP_Users]
+--     @i_PageNumber = 3,
+--     @i_RowsPerPage = 10,
+--     @w_Accion = 'S',
+--     @o_Numero = @Numero OUTPUT,
+--     @o_MensajeUsuario = @MensajeUsuario OUTPUT,
+--     @o_MensajeTecnico = @MensajeTecnico OUTPUT;
 
 
 -- EXEC [SQM_SECURITY].[USP_Users]
@@ -49,5 +49,11 @@ EXEC [SQM_SECURITY].[USP_Users]
 --     @o_Numero = @Numero OUTPUT,
 --     @o_MensajeUsuario = @MensajeUsuario OUTPUT,
 --     @o_MensajeTecnico = @MensajeTecnico OUTPUT;
+
+EXEC [SQM_CATALOGS].[USP_Status]
+    @w_Accion = 'S',
+    @o_Numero = @Numero OUTPUT,
+    @o_MensajeUsuario = @MensajeUsuario OUTPUT,
+    @o_MensajeTecnico = @MensajeTecnico OUTPUT;
 
 SELECT @Numero AS Codigo, @MensajeUsuario AS MensajeUsuario, @MensajeTecnico AS MensajeTecnico
